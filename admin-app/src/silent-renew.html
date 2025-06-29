@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Silent Renew</title>
+</head>
+<body>
+    <script>
+        // For Authorization Code flow with PKCE
+        if (window.parent) {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hash = window.location.hash;
+            
+            // Send both query params and hash to parent
+            const message = {
+                search: window.location.search,
+                hash: hash,
+                href: window.location.href
+            };
+            
+            window.parent.postMessage(message, window.location.origin);
+        }
+    </script>
+</body>
+</html> 

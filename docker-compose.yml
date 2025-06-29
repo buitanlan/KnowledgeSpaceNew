@@ -1,0 +1,17 @@
+version: '3.9'
+
+services:
+  knowledgespace.backendserver:
+    image: ${DOCKER_REGISTRY-}knowledgespacebackendserver
+    build:
+      context: .
+      dockerfile: src/KnowledgeSpace.BackendServer/Dockerfile
+
+  postgres:
+    image: bitnami/postgresql:latest
+
+networks:
+  exam:
+    driver: bridge
+volumes:
+  postgres_data:
