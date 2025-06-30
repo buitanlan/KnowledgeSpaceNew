@@ -4,11 +4,11 @@ A modern knowledge management system with a comprehensive admin portal built usi
 
 ## 🚀 Migration Completed Successfully
 
-This project has been successfully migrated from **Duende IdentityServer** to **Microsoft Identity** with **JWT authentication**, and the admin frontend has been modernized with **Angular 19**, **PrimeNG 19**, and **TailwindCSS 4**.
+This project has been successfully migrated from **Duende IdentityServer** to **Microsoft Identity** with **JWT authentication**, and the admin frontend has been modernized with **Angular 20**, **PrimeNG 19**, and **TailwindCSS 4**.
 
 ## 📋 Features
 
-### Backend (.NET 8)
+### Backend (.NET 9)
 - **JWT Authentication** - Secure token-based authentication
 - **Microsoft Identity** - ASP.NET Core Identity for user management
 - **Entity Framework Core** - Data persistence with SQL Server
@@ -16,7 +16,7 @@ This project has been successfully migrated from **Duende IdentityServer** to **
 - **Role-based Authorization** - Comprehensive permission system
 
 ### Frontend (Angular 19)
-- **Modern Angular 19** - Latest Angular with standalone components
+- **Modern Angular 20** - Latest Angular with standalone components
 - **Angular Signals** - Reactive state management
 - **@for/@if Directives** - New control flow syntax
 - **inject() Function** - Modern dependency injection
@@ -61,7 +61,7 @@ KnowledgeSpace - Copy/
 ## 🛠️ Technologies Used
 
 ### Backend
-- **.NET 8** - Latest .NET framework
+- **.NET 9** - Latest .NET framework
 - **ASP.NET Core Identity** - User and role management
 - **Entity Framework Core 8** - ORM for database operations
 - **SQL Server** - Database
@@ -70,7 +70,7 @@ KnowledgeSpace - Copy/
 - **FluentValidation** - Input validation
 
 ### Frontend
-- **Angular 19** - Modern SPA framework
+- **Angular 20** - Modern SPA framework
 - **PrimeNG 19** - Professional Angular UI components
 - **TailwindCSS 4** - Utility-first CSS framework
 - **Angular Signals** - Reactive state management

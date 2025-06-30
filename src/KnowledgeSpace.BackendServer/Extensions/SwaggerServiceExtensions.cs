@@ -41,7 +41,7 @@ public static class SwaggerServiceExtensions
                     {
                         Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
                     },
-                    new string[] { }
+                    []
                 }
             });
         });

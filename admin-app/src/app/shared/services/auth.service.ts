@@ -31,7 +31,7 @@ export interface UserInfo {
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
-  
+
   private readonly apiUrl = environment.apiUrl || 'https://localhost:5000/api';
   private readonly TOKEN_KEY = 'auth_token';
   private readonly USER_INFO_KEY = 'user_info';
@@ -55,14 +55,14 @@ export class AuthService {
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
     this._loading.set(true);
-    
+
     return this.http.post<LoginResponse>(`${this.apiUrl}/users/login`, credentials).pipe(
-      tap(response => {
+      tap((response) => {
         this.setAuthData(response);
         this._isAuthenticated.set(true);
         this._loading.set(false);
       }),
-      catchError(error => {
+      catchError((error) => {
         this._loading.set(false);
         return throwError(() => error);
       })
@@ -94,7 +94,7 @@ export class AuthService {
 
   private setAuthData(response: LoginResponse): void {
     localStorage.setItem(this.TOKEN_KEY, response.token);
-    
+
     // Decode JWT to get user info and permissions
     const userInfo = this.decodeToken(response.token);
     if (userInfo) {
@@ -105,7 +105,7 @@ export class AuthService {
         permissions: userInfo.permissions || [],
         roles: userInfo.roles || []
       };
-      
+
       localStorage.setItem(this.USER_INFO_KEY, JSON.stringify(fullUserInfo));
       this._userInfo.set(fullUserInfo);
     }
@@ -116,7 +116,7 @@ export class AuthService {
       const payload = token.split('.')[1];
       const decoded = atob(payload);
       const parsed = JSON.parse(decoded);
-      
+
       return {
         permissions: parsed.permissions ? JSON.parse(parsed.permissions) : [],
         roles: parsed.role ? (Array.isArray(parsed.role) ? parsed.role : [parsed.role]) : []
@@ -143,7 +143,7 @@ export class AuthService {
   private getUserInfoFromStorage(): UserInfo | null {
     const userInfoStr = localStorage.getItem(this.USER_INFO_KEY);
     if (!userInfoStr) return null;
-    
+
     try {
       return JSON.parse(userInfoStr);
     } catch {
@@ -156,4 +156,4 @@ export class AuthService {
       this.logout();
     }
   }
-} 
+}

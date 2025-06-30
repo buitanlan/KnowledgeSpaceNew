@@ -8,11 +8,7 @@ import { AuthService } from '@app/shared/services/auth.service';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [
-    CommonModule,
-    CardModule,
-    ButtonModule
-  ],
+  imports: [CommonModule, CardModule, ButtonModule],
   template: `
     <div class="p-6 space-y-6">
       <div>
@@ -134,7 +130,7 @@ import { AuthService } from '@app/shared/services/auth.service';
               <h3 class="text-lg font-semibold text-gray-900">System Information</h3>
             </div>
           </ng-template>
-          
+
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="text-center">
               <i class="pi pi-server text-3xl text-blue-500 mb-2"></i>
@@ -164,4 +160,4 @@ export class DashboardComponent {
   navigate(path: string): void {
     this.router.navigate([path]);
   }
-} 
+}

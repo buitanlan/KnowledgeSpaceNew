@@ -38,4 +38,4 @@ export class FunctionsService {
   deleteFunction(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
-} 
+}

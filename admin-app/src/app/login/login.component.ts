@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
@@ -11,12 +11,18 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { AuthService, LoginRequest } from '@app/shared/services/auth.service';
 import { NotificationService } from '@app/shared/services/notification.service';
 
+// Type-safe form interface
+interface LoginForm {
+  username: string;
+  password: string;
+}
+
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     ButtonModule,
     InputTextModule,
     PasswordModule,
@@ -34,35 +40,31 @@ import { NotificationService } from '@app/shared/services/notification.service';
               <p class="text-gray-600">Admin Portal</p>
             </div>
           </ng-template>
-          
-          <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="space-y-6">
+
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
             @if (errorMessage()) {
               <p-message severity="error" [text]="errorMessage()" class="w-full" />
             }
-            
+
             <div class="space-y-2">
-              <label for="username" class="block text-sm font-medium text-gray-700">
-                Username
-              </label>
+              <label for="username" class="block text-sm font-medium text-gray-700"> Username </label>
               <input
                 pInputText
                 id="username"
-                name="username"
-                [(ngModel)]="credentials.username"
-                required
+                formControlName="username"
                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter your username"
                 [disabled]="authService.loading()"
               />
+              @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
+                <small class="text-red-500">Username is required</small>
+              }
             </div>
-            
+
             <div class="space-y-2">
-              <label for="password" class="block text-sm font-medium text-gray-700">
-                Password
-              </label>
+              <label for="password" class="block text-sm font-medium text-gray-700"> Password </label>
               <p-password
-                [(ngModel)]="credentials.password"
-                name="password"
+                formControlName="password"
                 inputId="password"
                 [feedback]="false"
                 [toggleMask]="true"
@@ -70,20 +72,22 @@ import { NotificationService } from '@app/shared/services/notification.service';
                 styleClass="w-full"
                 inputStyleClass="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 [disabled]="authService.loading()"
-                required
               />
+              @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+                <small class="text-red-500">Password is required</small>
+              }
             </div>
-            
+
             <button
               pButton
               type="submit"
               label="Sign In"
               [loading]="authService.loading()"
-              [disabled]="!loginForm.valid || authService.loading()"
+              [disabled]="loginForm.invalid || authService.loading()"
               class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             ></button>
           </form>
-          
+
           <ng-template pTemplate="footer">
             <div class="text-center text-sm text-gray-500 space-y-2">
               <p>Default Admin: <strong>admin</strong> / <strong>Admin&#64;123</strong></p>
@@ -98,24 +102,28 @@ import { NotificationService } from '@app/shared/services/notification.service';
 export class LoginComponent {
   private readonly router = inject(Router);
   private readonly notificationService = inject(NotificationService);
+  private readonly fb = inject(FormBuilder);
   readonly authService = inject(AuthService);
 
-  credentials: LoginRequest = {
-    username: '',
-    password: ''
-  };
+  // Typed reactive form
+  loginForm = this.fb.group({
+    username: this.fb.control('', { nonNullable: true, validators: [Validators.required] }),
+    password: this.fb.control('', { nonNullable: true, validators: [Validators.required] })
+  });
 
   errorMessage = signal<string>('');
 
   onSubmit(): void {
-    if (!this.credentials.username || !this.credentials.password) {
-      this.errorMessage.set('Please enter both username and password');
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      this.errorMessage.set('Please fill in all required fields');
       return;
     }
 
     this.errorMessage.set('');
+    const credentials = this.loginForm.getRawValue() as LoginRequest;
 
-    this.authService.login(this.credentials).subscribe({
+    this.authService.login(credentials).subscribe({
       next: (response) => {
         this.notificationService.showSuccess('Login successful!');
         this.router.navigate(['/dashboard']);
@@ -126,4 +134,4 @@ export class LoginComponent {
       }
     });
   }
-} 
+}
