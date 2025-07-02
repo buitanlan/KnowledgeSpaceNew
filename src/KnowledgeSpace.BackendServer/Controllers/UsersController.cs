@@ -28,7 +28,7 @@ public class UsersController(
         {
             Id = Guid.NewGuid().ToString(),
             Email = request.Email,
-            Dob = DateTime.Parse(request.Dob, null, System.Globalization.DateTimeStyles.AdjustToUniversal),
+            Dob = DateTime.SpecifyKind(DateTime.Parse(request.Dob), DateTimeKind.Utc),
             UserName = request.UserName,
             LastName = request.LastName,
             FirstName = request.FirstName,

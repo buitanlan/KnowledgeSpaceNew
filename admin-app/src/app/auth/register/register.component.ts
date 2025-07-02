@@ -31,7 +31,7 @@ export class RegisterComponent {
   private readonly router = inject(Router);
   private readonly notificationService = inject(NotificationService);
   private readonly fb = inject(FormBuilder);
-  //readonly authService = inject(AuthService);
+  readonly authService = inject(AuthService);
   // Typed reactive form
   registerForm = this.fb.group(
     {
@@ -41,7 +41,8 @@ export class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       phoneNumber: ['', Validators.required],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      confirmPassword: ['', Validators.required]
+      confirmPassword: ['', Validators.required],
+      dob: ['', Validators.required]
     },
     {
       validators: this.passwordMatchValidator
@@ -64,8 +65,21 @@ export class RegisterComponent {
   onSubmit() {
     if (this.registerForm.valid) {
       const formValue = this.registerForm.value;
-      console.log('Registering with:', formValue);
-      // Call your service API here
+      if (formValue.dob) {
+        const utcDate = new Date(formValue.dob);
+        formValue.dob = utcDate.toISOString();
+      }
+      this.authService.register(formValue as RegisterRequest).subscribe({
+        next: () => {
+          this.notificationService.showSuccess('Registration successful!');
+          this.router.navigate(['/dashboard']);
+        },
+        error: (error) => {
+          const errorMsg = error.error?.message || 'Registration failed. Please try again.';
+          console.error('Registration error:', errorMsg);
+          this.notificationService.showError(errorMsg);
+        }
+      });
     } else {
       this.registerForm.markAllAsTouched();
     }

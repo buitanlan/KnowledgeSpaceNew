@@ -8,6 +8,11 @@ import { environment } from '@environments/environment';
 export interface RegisterRequest {
   username: string;
   password: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  confirmPassword: string;
+  dob: string;
 }
 
 export interface LoginRequest {

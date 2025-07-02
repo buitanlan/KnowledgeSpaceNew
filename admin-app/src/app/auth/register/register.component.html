@@ -1,123 +1,137 @@
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-12">
   <div class="w-full max-w-md">
-    <p-card class="shadow-2xl border-0">
+    <p-card class="shadow-xl border-0 rounded-2xl">
       <ng-template pTemplate="header">
-        <div class="text-center py-6">
-          <h1 class="text-3xl font-bold text-gray-800 mb-2">Scada Register</h1>
-          <p class="text-gray-600">Admin Portal</p>
+        <div class="text-center py-4">
+          <h1 class="text-3xl font-bold text-gray-800 mb-1">Scada Register</h1>
+          <p class="text-sm text-gray-500">Admin Portal</p>
         </div>
       </ng-template>
 
-      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-6">
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-5">
         @if (errorMessage()) {
           <p-message severity="error" [text]="errorMessage() || undefined" class="w-full" />
         }
-        <!-- Username -->
-        <div>
-          <label for="username" class="block text-sm font-medium text-gray-700"> Username </label>
-          <input
-            pInputText
-            id="username"
-            formControlName="username"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Enter your username"
-          />
-          @if (registerForm.get('username')?.invalid && registerForm.get('username')?.touched) {
-            <small class="text-red-500">Username is required</small>
-          }
-        </div>
 
-        <!-- First Name -->
-        <div>
-          <label for="firstName" class="block text-sm font-medium text-gray-700">First Name</label>
-          <input
-            pInputText
-            id="firstName"
-            formControlName="firstName"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="Enter your first name"
-          />
-          @if (registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched) {
-            <small class="text-red-500">First name is required</small>
-          }
-        </div>
+        <div class="grid grid-cols-1 gap-4">
+          <div>
+            <label for="username" class="text-sm font-medium text-gray-700">Username</label>
+            <input
+              pInputText
+              id="username"
+              formControlName="username"
+              placeholder="Enter your username"
+              class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+            @if (registerForm.get('username')?.invalid && registerForm.get('username')?.touched) {
+              <small class="text-red-500">Username is required</small>
+            }
+          </div>
 
-        <!-- Last Name -->
-        <div>
-          <label for="lastName" class="block text-sm font-medium text-gray-700">Last Name</label>
-          <input
-            pInputText
-            id="lastName"
-            formControlName="lastName"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="Enter your last name"
-          />
-          @if (registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched) {
-            <small class="text-red-500">Last name is required</small>
-          }
-        </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="firstName" class="text-sm font-medium text-gray-700">First Name</label>
+              <input
+                pInputText
+                id="firstName"
+                formControlName="firstName"
+                placeholder="Enter your first name"
+                class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+              @if (registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched) {
+                <small class="text-red-500">First name is required</small>
+              }
+            </div>
+            <div>
+              <label for="lastName" class="text-sm font-medium text-gray-700">Last Name</label>
+              <input
+                pInputText
+                id="lastName"
+                formControlName="lastName"
+                placeholder="Enter your last name"
+                class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+              @if (registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched) {
+                <small class="text-red-500">Last name is required</small>
+              }
+            </div>
+          </div>
 
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-          <input
-            pInputText
-            id="email"
-            formControlName="email"
-            type="email"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="Enter your email"
-          />
-          @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
-            <small class="text-red-500">Valid email is required</small>
-          }
-        </div>
+          <div>
+            <label for="email" class="text-sm font-medium text-gray-700">Email</label>
+            <input
+              pInputText
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="Enter your email"
+              class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg"
+            />
+            @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
+              <small class="text-red-500">Valid email is required</small>
+            }
+          </div>
 
-        <div>
-          <label for="phoneNumber" class="block text-sm font-medium text-gray-700">Phone Number</label>
-          <input
-            pInputText
-            id="phoneNumber"
-            formControlName="phoneNumber"
-            type="tel"
-            class="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="Enter your phone number"
-          />
-          @if (registerForm.get('phoneNumber')?.invalid && registerForm.get('phoneNumber')?.touched) {
-            <small class="text-red-500">Phone number is required</small>
-          }
-        </div>
+          <div>
+            <label for="phoneNumber" class="text-sm font-medium text-gray-700">Phone Number</label>
+            <input
+              pInputText
+              id="phoneNumber"
+              type="tel"
+              formControlName="phoneNumber"
+              placeholder="Enter your phone number"
+              class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg"
+            />
+            @if (registerForm.get('phoneNumber')?.invalid && registerForm.get('phoneNumber')?.touched) {
+              <small class="text-red-500">Phone number is required</small>
+            }
+          </div>
 
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700"> Password </label>
-          <p-password
-            formControlName="password"
-            inputId="password"
-            [feedback]="false"
-            [toggleMask]="true"
-            placeholder="Enter your password"
-            styleClass="w-full"
-            inputStyleClass="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
-            <small class="text-red-500">Password is required</small>
-          }
-        </div>
+          <div>
+            <label for="dob" class="text-sm font-medium text-gray-700">Date of Birth</label>
+            <input
+              pInputText
+              id="dob"
+              type="date"
+              formControlName="dob"
+              class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg"
+            />
+            @if (registerForm.get('dob')?.invalid && registerForm.get('dob')?.touched) {
+              <small class="text-red-500">Date of birth is required</small>
+            }
+          </div>
 
-        <!-- Confirm Password -->
-        <div>
-          <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirm Password</label>
-          <p-password
-            formControlName="confirmPassword"
-            inputId="confirmPassword"
-            [feedback]="false"
-            [toggleMask]="true"
-            placeholder="Confirm your password"
-            styleClass="w-full"
-            inputStyleClass="w-full px-3 py-2 border border-gray-300 rounded-md"
-          />
-          @if (registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched) {
-            <small class="text-red-500">Confirm password is required and must match</small>
-          }
+          <div>
+            <label for="password" class="text-sm font-medium text-gray-700">Password</label>
+            <p-password
+              inputId="password"
+              formControlName="password"
+              [feedback]="false"
+              [toggleMask]="true"
+              placeholder="Enter your password"
+              styleClass="w-full"
+              inputStyleClass="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg"
+            />
+            @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
+              <small class="text-red-500">Password is required</small>
+            }
+          </div>
+
+          <div>
+            <label for="confirmPassword" class="text-sm font-medium text-gray-700">Confirm Password</label>
+            <p-password
+              inputId="confirmPassword"
+              formControlName="confirmPassword"
+              [feedback]="false"
+              [toggleMask]="true"
+              placeholder="Confirm your password"
+              styleClass="w-full"
+              inputStyleClass="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg"
+            />
+            @if (registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched) {
+              <small class="text-red-500">Confirm password is required and must match</small>
+            }
+          </div>
         </div>
 
         <button
@@ -125,13 +139,14 @@
           type="submit"
           label="Register"
           [disabled]="registerForm.invalid"
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          class="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg transition transform hover:scale-[1.02] duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500"
         ></button>
       </form>
 
       <ng-template pTemplate="footer">
-        <div class="text-center text-sm text-gray-500 mt-4">
-          Already have an account? <a routerLink="/login" class="text-blue-600 hover:underline">Login</a>
+        <div class="text-center text-sm text-gray-500 mt-5">
+          Already have an account?
+          <a routerLink="/login" class="text-blue-600 hover:underline">Login</a>
         </div>
       </ng-template>
     </p-card>
