@@ -13,7 +13,7 @@ import { AuthService } from '@app/shared/services/auth.service';
     <div class="p-6 space-y-6">
       <div>
         <h1 class="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-        <p class="text-gray-600">Welcome to the Knowledge Space Admin Portal</p>
+        <p class="text-gray-600">Welcome to the Scada 1-1</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -135,7 +135,7 @@ import { AuthService } from '@app/shared/services/auth.service';
             <div class="text-center">
               <i class="pi pi-server text-3xl text-blue-500 mb-2"></i>
               <h4 class="font-semibold text-gray-900">Backend Server</h4>
-              <p class="text-sm text-gray-600">Knowledge Space API</p>
+              <p class="text-sm text-gray-600">Scada API</p>
             </div>
             <div class="text-center">
               <i class="pi pi-database text-3xl text-green-500 mb-2"></i>

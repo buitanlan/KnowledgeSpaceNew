@@ -26,7 +26,7 @@ import { NotificationService } from '@app/shared/services/notification.service';
               class="p-button-text p-button-rounded"
               (click)="sidebarVisible.set(true)"
             ></button>
-            <h1 class="text-xl font-semibold text-gray-800">Knowledge Space Admin</h1>
+            <h1 class="text-xl font-semibold text-gray-800">Scada</h1>
           </div>
 
           <div class="flex items-center gap-4">

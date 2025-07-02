@@ -8,5 +8,5 @@ import { RouterOutlet } from '@angular/router';
   template: ` <router-outlet /> `
 })
 export class AppComponent {
-  title = 'Knowledge Space Admin';
+  title = 'Scada 1-1';
 }
