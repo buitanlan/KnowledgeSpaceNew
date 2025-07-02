@@ -21,15 +21,14 @@ public class UsersController(
         ITokenService tokenService) : BaseController
 {
     [HttpPost]
-    [ClaimRequirement(FunctionCode.SystemUser, CommandCode.Create)]
-    [ApiValidationFilter]
+    [AllowAnonymous]
     public async Task<IActionResult> PostUser(UserCreateRequest request)
     {
         var user = new User
         {
             Id = Guid.NewGuid().ToString(),
             Email = request.Email,
-            Dob = DateTime.Parse(request.Dob),
+            Dob = DateTime.Parse(request.Dob, null, System.Globalization.DateTimeStyles.AdjustToUniversal),
             UserName = request.UserName,
             LastName = request.LastName,
             FirstName = request.FirstName,
@@ -57,10 +56,10 @@ public class UsersController(
             .Select(u => new UserVm
             {
                 Id = u.Id,
-                UserName = u.UserName,
+                UserName = u.UserName!,
                 Dob = u.Dob,
-                Email = u.Email,
-                PhoneNumber = u.PhoneNumber,
+                Email = u.Email!,
+                PhoneNumber = u.PhoneNumber!,
                 FirstName = u.FirstName,
                 LastName = u.LastName
             })
