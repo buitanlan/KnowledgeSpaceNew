@@ -5,6 +5,11 @@ import { catchError, tap } from 'rxjs/operators';
 import { Observable, throwError, of } from 'rxjs';
 import { environment } from '@environments/environment';
 
+export interface RegisterRequest {
+  username: string;
+  password: string;
+}
+
 export interface LoginRequest {
   username: string;
   password: string;
@@ -64,6 +69,22 @@ export class AuthService {
       }),
       catchError((error) => {
         this._loading.set(false);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  register(credentials: RegisterRequest): Observable<any> {
+    // this._loading.set(true);
+
+    return this.http.post<any>(`${this.apiUrl}/users`, credentials).pipe(
+      tap((response) => {
+        // this.setAuthData(response);
+        // this._isAuthenticated.set(true);
+        // this._loading.set(false);
+      }),
+      catchError((error) => {
+        // this._loading.set(false);
         return throwError(() => error);
       })
     );

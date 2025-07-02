@@ -9,8 +9,14 @@ export const appRoutes: Routes = [
   },
   {
     path: 'login',
-    loadChildren: () => import('./login/login.route').then((m) => m.routes)
+    loadChildren: () => import('./auth/login/login.route').then((m) => m.routes)
   },
+  {
+    path: 'register',
+    loadChildren: () => import('./auth/register/register.routes').then((m) => m.routes)
+  },
+  { path: 'debug', loadComponent: () => import('./auth/register/register.component').then((m) => m.RegisterComponent) },
+
   {
     path: 'dashboard',
     loadChildren: () => import('./protected-zone/protected-zone.route').then((m) => m.routes),

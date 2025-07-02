@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -28,7 +28,8 @@ interface LoginForm {
     PasswordModule,
     CardModule,
     MessageModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    RouterModule
   ],
   template: `
     <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
@@ -36,7 +37,7 @@ interface LoginForm {
         <p-card class="shadow-2xl border-0">
           <ng-template pTemplate="header">
             <div class="text-center py-6">
-              <h1 class="text-3xl font-bold text-gray-800 mb-2">Knowledge Space</h1>
+              <h1 class="text-3xl font-bold text-gray-800 mb-2">Scada Login</h1>
               <p class="text-gray-600">Admin Portal</p>
             </div>
           </ng-template>
@@ -92,6 +93,11 @@ interface LoginForm {
             <div class="text-center text-sm text-gray-500 space-y-2">
               <p>Default Admin: <strong>admin</strong> / <strong>Admin&#64;123</strong></p>
               <p>Default User: <strong>user</strong> / <strong>User&#64;123</strong></p>
+
+              <p class="pt-2">
+                Don't have an account?
+                <a routerLink="/register" class="text-blue-600 hover:underline">Register</a>
+              </p>
             </div>
           </ng-template>
         </p-card>
@@ -119,7 +125,7 @@ export class LoginComponent {
       this.errorMessage.set('Please fill in all required fields');
       return;
     }
-
+    debugger;
     this.errorMessage.set('');
     const credentials = this.loginForm.getRawValue() as LoginRequest;
 
