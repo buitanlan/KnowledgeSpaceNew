@@ -5,7 +5,6 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
   return next(request).pipe(retry(1), catchError(handleErrors));
 };
 
-
 const handleErrors = (error: HttpErrorResponse) => {
   if (error.error.message) {
     return throwError(() => error.error.message || 'Server error');

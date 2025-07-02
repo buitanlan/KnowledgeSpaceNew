@@ -12,31 +12,23 @@ import { NotificationService } from '@app/shared/services/notification.service';
 @Component({
   selector: 'app-protected-zone',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterOutlet,
-    SidebarModule,
-    ButtonModule,
-    MenuModule,
-    ToastModule,
-    AvatarModule
-  ],
+  imports: [CommonModule, RouterOutlet, SidebarModule, ButtonModule, MenuModule, ToastModule, AvatarModule],
   template: `
     <div class="min-h-screen bg-gray-50">
       <!-- Header -->
       <header class="bg-white shadow-sm border-b border-gray-200">
         <div class="px-6 py-4 flex justify-between items-center">
           <div class="flex items-center gap-4">
-            <button 
-              pButton 
-              type="button" 
+            <button
+              pButton
+              type="button"
               icon="pi pi-bars"
               class="p-button-text p-button-rounded"
               (click)="sidebarVisible.set(true)"
             ></button>
             <h1 class="text-xl font-semibold text-gray-800">Knowledge Space Admin</h1>
           </div>
-          
+
           <div class="flex items-center gap-4">
             <div class="text-right">
               <div class="text-sm font-medium text-gray-900">
@@ -46,14 +38,10 @@ import { NotificationService } from '@app/shared/services/notification.service';
                 {{ authService.userInfo()?.email || 'admin@example.com' }}
               </div>
             </div>
-            <p-avatar 
-              [label]="getInitials()"
-              styleClass="bg-blue-500 text-white"
-              shape="circle"
-            />
-            <button 
-              pButton 
-              type="button" 
+            <p-avatar [label]="getInitials()" styleClass="bg-blue-500 text-white" shape="circle" />
+            <button
+              pButton
+              type="button"
               icon="pi pi-sign-out"
               class="p-button-text p-button-rounded"
               pTooltip="Logout"
@@ -71,28 +59,30 @@ import { NotificationService } from '@app/shared/services/notification.service';
             <div class="px-6 mb-6">
               <h2 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Navigation</h2>
             </div>
-            
+
             <div class="space-y-1">
               <!-- Dashboard -->
-              <a 
+              <a
                 class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 cursor-pointer"
                 (click)="navigate('/dashboard')"
               >
                 <i class="pi pi-chart-line mr-3 text-gray-400"></i>
                 Dashboard
               </a>
-              
+
               <!-- System Management -->
-              @if (authService.hasPermission('SystemUser', 'View') || 
-                   authService.hasPermission('SystemRole', 'View') || 
-                   authService.hasPermission('SystemFunction', 'View') || 
-                   authService.hasPermission('SystemPermission', 'View')) {
+              @if (
+                authService.hasPermission('SystemUser', 'View') ||
+                authService.hasPermission('SystemRole', 'View') ||
+                authService.hasPermission('SystemFunction', 'View') ||
+                authService.hasPermission('SystemPermission', 'View')
+              ) {
                 <div class="px-6 py-2">
                   <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">System</h3>
                 </div>
-                
+
                 @if (authService.hasPermission('SystemUser', 'View')) {
-                  <a 
+                  <a
                     class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 cursor-pointer"
                     (click)="navigate('/systems/users')"
                   >
@@ -100,9 +90,9 @@ import { NotificationService } from '@app/shared/services/notification.service';
                     User Management
                   </a>
                 }
-                
+
                 @if (authService.hasPermission('SystemRole', 'View')) {
-                  <a 
+                  <a
                     class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 cursor-pointer"
                     (click)="navigate('/systems/roles')"
                   >
@@ -110,9 +100,9 @@ import { NotificationService } from '@app/shared/services/notification.service';
                     Role Management
                   </a>
                 }
-                
+
                 @if (authService.hasPermission('SystemFunction', 'View')) {
-                  <a 
+                  <a
                     class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 cursor-pointer"
                     (click)="navigate('/systems/functions')"
                   >
@@ -120,9 +110,9 @@ import { NotificationService } from '@app/shared/services/notification.service';
                     Function Management
                   </a>
                 }
-                
+
                 @if (authService.hasPermission('SystemPermission', 'View')) {
-                  <a 
+                  <a
                     class="flex items-center px-6 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 cursor-pointer"
                     (click)="navigate('/systems/permissions')"
                   >
@@ -142,37 +132,34 @@ import { NotificationService } from '@app/shared/services/notification.service';
       </div>
 
       <!-- Mobile Sidebar -->
-      <p-sidebar 
-        [(visible)]="sidebarVisible" 
-        position="left"
-        [modal]="true"
-        styleClass="w-64"
-      >
+      <p-sidebar [(visible)]="sidebarVisible" position="left" [modal]="true" styleClass="w-64">
         <ng-template pTemplate="header">
           <h2 class="text-lg font-semibold">Navigation</h2>
         </ng-template>
-        
+
         <div class="space-y-1">
           <!-- Dashboard -->
-          <a 
+          <a
             class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 cursor-pointer rounded"
             (click)="navigate('/dashboard')"
           >
             <i class="pi pi-chart-line mr-3 text-gray-400"></i>
             Dashboard
           </a>
-          
+
           <!-- System Management -->
-          @if (authService.hasPermission('SystemUser', 'View') || 
-               authService.hasPermission('SystemRole', 'View') || 
-               authService.hasPermission('SystemFunction', 'View') || 
-               authService.hasPermission('SystemPermission', 'View')) {
+          @if (
+            authService.hasPermission('SystemUser', 'View') ||
+            authService.hasPermission('SystemRole', 'View') ||
+            authService.hasPermission('SystemFunction', 'View') ||
+            authService.hasPermission('SystemPermission', 'View')
+          ) {
             <div class="px-4 py-2">
               <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">System</h3>
             </div>
-            
+
             @if (authService.hasPermission('SystemUser', 'View')) {
-              <a 
+              <a
                 class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 cursor-pointer rounded"
                 (click)="navigate('/systems/users')"
               >
@@ -180,9 +167,9 @@ import { NotificationService } from '@app/shared/services/notification.service';
                 User Management
               </a>
             }
-            
+
             @if (authService.hasPermission('SystemRole', 'View')) {
-              <a 
+              <a
                 class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 cursor-pointer rounded"
                 (click)="navigate('/systems/roles')"
               >
@@ -190,9 +177,9 @@ import { NotificationService } from '@app/shared/services/notification.service';
                 Role Management
               </a>
             }
-            
+
             @if (authService.hasPermission('SystemFunction', 'View')) {
-              <a 
+              <a
                 class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 cursor-pointer rounded"
                 (click)="navigate('/systems/functions')"
               >
@@ -200,9 +187,9 @@ import { NotificationService } from '@app/shared/services/notification.service';
                 Function Management
               </a>
             }
-            
+
             @if (authService.hasPermission('SystemPermission', 'View')) {
-              <a 
+              <a
                 class="flex items-center px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 cursor-pointer rounded"
                 (click)="navigate('/systems/permissions')"
               >
@@ -242,4 +229,4 @@ export class ProtectedZoneComponent {
     }
     return 'AD';
   }
-} 
+}

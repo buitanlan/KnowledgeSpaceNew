@@ -46,4 +46,4 @@ export class NotificationService {
   clear(): void {
     this.messageService.clear();
   }
-} 
+}

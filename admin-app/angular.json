@@ -40,27 +40,11 @@
             "index": "src/index.html",
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
-            "polyfills": [
-              "zone.js",
-              "@angular/localize/init"
-            ],
-            "assets": [
-              "src/assets",
-              "src/favicon.ico",
-              "src/silent-renew.html"
-            ],
-            "styles": [
-              "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
-              "node_modules/primeicons/primeicons.css",
-              "node_modules/bootstrap/dist/css/bootstrap.min.css",
-              "src/styles/app.scss"
-            ],
-            "scripts": [
-              "node_modules/chart.js/dist/chart.cjs"
-            ],
-            "allowedCommonJsDependencies": [
-              "chart.js"
-            ]
+            "polyfills": ["zone.js", "@angular/localize/init"],
+            "assets": ["src/assets", "src/favicon.ico"],
+            "styles": ["node_modules/primeicons/primeicons.css", "src/styles/app.scss"],
+            "scripts": [],
+            "allowedCommonJsDependencies": []
           },
           "configurations": {
             "production": {
@@ -113,20 +97,12 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
+            "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
             "inlineStyleLanguage": "scss",
             "scripts": [],
-            "styles": [
-              "src/styles/app.scss"
-            ],
-            "assets": [
-              "src/assets",
-              "src/favicon.ico"
-            ]
+            "styles": ["src/styles/app.scss"],
+            "assets": ["src/assets", "src/favicon.ico"]
           }
         },
         "analyze": {

@@ -123,7 +123,7 @@ public class FunctionsControllerTest
         if (result is OkObjectResult okResult)
         {
             var functionVms = okResult.Value as IEnumerable<FunctionVm>;
-            Assert.True((functionVms ?? Array.Empty<FunctionVm>()).Any());
+            Assert.True((functionVms ?? []).Any());
         }
     }
 

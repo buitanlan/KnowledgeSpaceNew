@@ -2,10 +2,7 @@ import { inject } from '@angular/core';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '@app/shared/services/auth.service';
 
-export const authGuard = (
-  route: ActivatedRouteSnapshot,
-  state: RouterStateSnapshot,
-) => {
+export const authGuard = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
   const router = inject(Router);
   const authService = inject(AuthService);
 
@@ -27,7 +24,7 @@ export const authGuard = (
   }
 
   const hasPermission = authService.hasPermission(functionCode, 'View');
-  
+
   if (!hasPermission) {
     console.log(`Auth Guard - No permission for ${functionCode}, redirecting to access denied`);
     router.navigate(['/access-denied'], {

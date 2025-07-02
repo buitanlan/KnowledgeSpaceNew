@@ -80,7 +80,7 @@ public class RolesControllerTest
         if (result is OkObjectResult okResult)
         {
             var roleVms = okResult.Value as IEnumerable<RoleVm>;
-            Assert.True((roleVms ?? Array.Empty<RoleVm>()).Any());
+            Assert.True((roleVms ?? []).Any());
         }
     }
 

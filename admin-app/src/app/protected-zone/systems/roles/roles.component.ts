@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormControl, Validators } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -13,6 +13,7 @@ import { ConfirmationService } from 'primeng/api';
 import { RolesService } from '@app/shared/services/roles.service';
 import { NotificationService } from '@app/shared/services/notification.service';
 import { AuthService } from '@app/shared/services/auth.service';
+import { PermissionDirective } from '@app/shared/directives/permission-directive.directive';
 
 export interface Role {
   id: string;
@@ -21,12 +22,17 @@ export interface Role {
   concurrencyStamp?: string;
 }
 
+// Type-safe form interface
+interface RoleFormData {
+  name: string;
+}
+
 @Component({
   selector: 'app-roles',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     TableModule,
     ButtonModule,
     InputTextModule,
@@ -34,7 +40,8 @@ export interface Role {
     CardModule,
     TagModule,
     ToastModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    PermissionDirective
   ],
   template: `
     <div class="p-6">
@@ -45,25 +52,26 @@ export interface Role {
               <h1 class="text-2xl font-bold mb-1">Role Management</h1>
               <p class="text-orange-100">Manage system roles and their permissions</p>
             </div>
-            @if (authService.hasPermission('SystemRole', 'Create')) {
-              <button 
-                pButton 
-                type="button" 
-                label="New Role" 
-                icon="pi pi-plus"
-                class="p-button-sm bg-white text-orange-600 hover:bg-orange-50"
-                (click)="openCreateDialog()"
-              ></button>
-            }
+            <button
+              pButton
+              type="button"
+              label="New Role"
+              icon="pi pi-plus"
+              class="p-button-sm bg-white text-orange-600 hover:bg-orange-50"
+              (click)="openCreateDialog()"
+              appPermission
+              [appFunction]="'SystemRole'"
+              [appAction]="'Create'"
+            ></button>
           </div>
         </ng-template>
 
         <div class="p-4">
           <!-- Roles Table -->
-          <p-table 
-            [value]="roles()" 
+          <p-table
+            [value]="roles()"
             [loading]="loading()"
-            [paginator]="true" 
+            [paginator]="true"
             [rows]="10"
             [showCurrentPageReport]="true"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
@@ -75,61 +83,51 @@ export interface Role {
                 <th class="text-left">Role ID</th>
                 <th class="text-left">Status</th>
                 <th class="text-left">Description</th>
-                @if (authService.hasPermission('SystemRole', 'Update') || authService.hasPermission('SystemRole', 'Delete')) {
-                  <th class="text-center">Actions</th>
-                }
+                <th class="text-center" appPermission [appFunction]="'SystemRole'" [appAction]="'Update'">Actions</th>
               </tr>
             </ng-template>
             <ng-template pTemplate="body" let-role>
               <tr>
                 <td>
-                  <p-tag 
-                    [value]="role.name" 
-                    [severity]="getRoleSeverity(role.name)"
-                    class="font-medium"
-                  />
+                  <p-tag [value]="role.name" [severity]="getRoleSeverity(role.name)" class="font-medium" />
                 </td>
                 <td>
                   <code class="bg-gray-100 px-2 py-1 rounded text-sm">{{ role.id }}</code>
                 </td>
                 <td>
-                  <p-tag 
-                    value="Active" 
-                    severity="success"
-                    class="text-xs"
-                  />
+                  <p-tag value="Active" severity="success" class="text-xs" />
                 </td>
                 <td>
                   <span class="text-gray-700">{{ getRoleDescription(role.name) }}</span>
                 </td>
-                @if (authService.hasPermission('SystemRole', 'Update') || authService.hasPermission('SystemRole', 'Delete')) {
-                  <td class="text-center">
-                    <div class="flex justify-center gap-2">
-                      @if (authService.hasPermission('SystemRole', 'Update')) {
-                        <button 
-                          pButton 
-                          type="button"
-                          icon="pi pi-pencil"
-                          class="p-button-text p-button-rounded p-button-sm"
-                          pTooltip="Edit"
-                          (click)="editRole(role)"
-                          [disabled]="role.name === 'Admin'"
-                        ></button>
-                      }
-                      @if (authService.hasPermission('SystemRole', 'Delete') && !isSystemRole(role.name)) {
-                        <button 
-                          pButton 
-                          type="button"
-                          icon="pi pi-trash"
-                          class="p-button-text p-button-rounded p-button-sm p-button-danger"
-                          pTooltip="Delete"
-                          (click)="deleteRole(role.id, role.name)"
-                          [disabled]="role.name === 'Admin'"
-                        ></button>
-                      }
-                    </div>
-                  </td>
-                }
+                <td class="text-center">
+                  <div class="flex justify-center gap-2">
+                    <button
+                      pButton
+                      type="button"
+                      icon="pi pi-pencil"
+                      class="p-button-text p-button-rounded p-button-sm"
+                      pTooltip="Edit"
+                      (click)="editRole(role)"
+                      [disabled]="role.name === 'Admin'"
+                      appPermission
+                      [appFunction]="'SystemRole'"
+                      [appAction]="'Update'"
+                    ></button>
+                    <button
+                      pButton
+                      type="button"
+                      icon="pi pi-trash"
+                      class="p-button-text p-button-rounded p-button-sm p-button-danger"
+                      pTooltip="Delete"
+                      (click)="deleteRole(role.id, role.name)"
+                      [disabled]="role.name === 'Admin' || isSystemRole(role.name)"
+                      appPermission
+                      [appFunction]="'SystemRole'"
+                      [appAction]="'Delete'"
+                    ></button>
+                  </div>
+                </td>
               </tr>
             </ng-template>
             <ng-template pTemplate="emptymessage">
@@ -147,7 +145,7 @@ export interface Role {
       </p-card>
 
       <!-- Create/Edit Role Dialog -->
-      <p-dialog 
+      <p-dialog
         [header]="isEditMode() ? 'Edit Role' : 'Create New Role'"
         [modal]="true"
         [draggable]="false"
@@ -155,35 +153,27 @@ export interface Role {
         [(visible)]="showRoleDialog"
         [style]="{ width: '400px' }"
       >
-        <form (ngSubmit)="saveRole()" #roleForm="ngForm" class="space-y-4">
+        <form [formGroup]="roleForm" (ngSubmit)="saveRole()" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Role Name</label>
-            <input 
-              pInputText 
-              [(ngModel)]="roleFormData.name"
-              name="name"
-              required
-              placeholder="e.g., Manager, Moderator"
-              class="w-full"
-            />
+            <label class="block text-sm font-medium text-gray-700 mb-1">Role Name *</label>
+            <input pInputText formControlName="name" placeholder="e.g., Manager, Moderator" class="w-full" />
+            @if (roleForm.get('name')?.invalid && roleForm.get('name')?.touched) {
+              <small class="text-red-500">Role name is required</small>
+            }
             <small class="text-gray-500">Enter a descriptive role name</small>
           </div>
         </form>
-        
+
         <ng-template pTemplate="footer">
           <div class="flex justify-end gap-2">
-            <button 
-              pButton 
-              type="button"
-              label="Cancel"
-              class="p-button-text"
-              (click)="hideDialog()"
-            ></button>
-            <button 
-              pButton 
+            <button pButton type="button" label="Cancel" class="p-button-text" (click)="hideDialog()"></button>
+            <button
+              pButton
               type="submit"
               [label]="isEditMode() ? 'Update' : 'Create'"
-              [disabled]="!roleForm.valid"
+              [loading]="saving()"
+              [disabled]="roleForm.invalid"
+              (click)="saveRole()"
             ></button>
           </div>
         </ng-template>
@@ -198,6 +188,7 @@ export class RolesComponent implements OnInit {
   private readonly rolesService = inject(RolesService);
   private readonly notificationService = inject(NotificationService);
   private readonly confirmationService = inject(ConfirmationService);
+  private readonly fb = inject(FormBuilder);
   readonly authService = inject(AuthService);
 
   // Signals
@@ -206,13 +197,14 @@ export class RolesComponent implements OnInit {
   saving = signal<boolean>(false);
   isEditMode = signal<boolean>(false);
 
-  // Form data
+  // Dialog state
   showRoleDialog = false;
   currentRoleId = '';
-  
-  roleFormData: Partial<Role> = {
-    name: ''
-  };
+
+  // Typed reactive form
+  roleForm = this.fb.group({
+    name: this.fb.control('', { nonNullable: true, validators: [Validators.required] })
+  });
 
   ngOnInit(): void {
     this.loadRoles();
@@ -242,40 +234,46 @@ export class RolesComponent implements OnInit {
   editRole(role: Role): void {
     this.isEditMode.set(true);
     this.currentRoleId = role.id;
-    this.roleFormData = { ...role };
+
+    this.roleForm.patchValue({
+      name: role.name
+    });
+
     this.showRoleDialog = true;
   }
 
   saveRole(): void {
+    if (this.roleForm.invalid) {
+      this.roleForm.markAllAsTouched();
+      return;
+    }
+
     this.saving.set(true);
-    
+    const formData = this.roleForm.getRawValue();
+
     if (this.isEditMode()) {
-      this.rolesService.updateRole(this.currentRoleId, this.roleFormData).subscribe({
+      this.rolesService.updateRole(this.currentRoleId, formData).subscribe({
         next: () => {
           this.notificationService.showSuccess('Role updated successfully');
-          this.showRoleDialog = false;
+          this.hideDialog();
           this.loadRoles();
-          this.saving.set(false);
         },
         error: (error) => {
-          console.error('Error updating role:', error);
-          this.notificationService.showError('Failed to update role');
-          this.saving.set(false);
-        }
+          this.notificationService.showError('Failed to update role: ' + error.message);
+        },
+        complete: () => this.saving.set(false)
       });
     } else {
-      this.rolesService.createRole(this.roleFormData).subscribe({
+      this.rolesService.createRole(formData).subscribe({
         next: () => {
           this.notificationService.showSuccess('Role created successfully');
-          this.showRoleDialog = false;
+          this.hideDialog();
           this.loadRoles();
-          this.saving.set(false);
         },
         error: (error) => {
-          console.error('Error creating role:', error);
-          this.notificationService.showError('Failed to create role');
-          this.saving.set(false);
-        }
+          this.notificationService.showError('Failed to create role: ' + error.message);
+        },
+        complete: () => this.saving.set(false)
       });
     }
   }
@@ -303,21 +301,31 @@ export class RolesComponent implements OnInit {
 
   getRoleSeverity(roleName: string): 'success' | 'info' | 'warning' | 'danger' {
     switch (roleName.toLowerCase()) {
-      case 'admin': return 'danger';
-      case 'manager': return 'warning';
-      case 'moderator': return 'info';
-      case 'member': return 'success';
-      default: return 'info';
+      case 'admin':
+        return 'danger';
+      case 'manager':
+        return 'warning';
+      case 'moderator':
+        return 'info';
+      case 'member':
+        return 'success';
+      default:
+        return 'info';
     }
   }
 
   getRoleDescription(roleName: string): string {
     switch (roleName.toLowerCase()) {
-      case 'admin': return 'Full system access and management capabilities';
-      case 'manager': return 'Content and user management permissions';
-      case 'moderator': return 'Content moderation and review permissions';
-      case 'member': return 'Standard user access and basic permissions';
-      default: return 'Custom role with specific permissions';
+      case 'admin':
+        return 'Full system access and management capabilities';
+      case 'manager':
+        return 'Content and user management permissions';
+      case 'moderator':
+        return 'Content moderation and review permissions';
+      case 'member':
+        return 'Standard user access and basic permissions';
+      default:
+        return 'Custom role with specific permissions';
     }
   }
 
@@ -327,13 +335,14 @@ export class RolesComponent implements OnInit {
   }
 
   private resetForm(): void {
-    this.roleFormData = {
+    this.roleForm.reset({
       name: ''
-    };
-    this.currentRoleId = '';
+    });
   }
 
   hideDialog(): void {
     this.showRoleDialog = false;
+    this.resetForm();
+    this.currentRoleId = '';
   }
-} 
+}

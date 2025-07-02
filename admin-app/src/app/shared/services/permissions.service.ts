@@ -67,4 +67,4 @@ export class PermissionsService {
   removePermissions(roleId: string, functionId: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/permissions/${roleId}/${functionId}`);
   }
-} 
+}

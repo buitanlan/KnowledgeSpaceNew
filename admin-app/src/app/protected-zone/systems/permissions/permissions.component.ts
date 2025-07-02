@@ -15,6 +15,7 @@ import { ConfirmationService } from 'primeng/api';
 import { PermissionsService } from '@app/shared/services/permissions.service';
 import { NotificationService } from '@app/shared/services/notification.service';
 import { AuthService } from '@app/shared/services/auth.service';
+import { PermissionDirective } from '@app/shared/directives/permission-directive.directive';
 
 export interface Permission {
   functionId: string;
@@ -59,7 +60,8 @@ export interface Role {
     CardModule,
     TagModule,
     ToastModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    PermissionDirective
   ],
   template: `
     <div class="p-6">
@@ -71,10 +73,10 @@ export interface Role {
               <p class="text-purple-100">Manage role-based permissions for system functions</p>
             </div>
             @if (authService.hasPermission('SystemPermission', 'Create')) {
-              <button 
-                pButton 
-                type="button" 
-                label="Assign Permission" 
+              <button
+                pButton
+                type="button"
+                label="Assign Permission"
                 icon="pi pi-plus"
                 class="p-button-sm bg-white text-purple-600 hover:bg-purple-50"
                 (click)="openAssignDialog()"
@@ -88,7 +90,7 @@ export interface Role {
           <div class="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Role Filter</label>
-              <p-dropdown 
+              <p-dropdown
                 [(ngModel)]="selectedRoleFilter"
                 [options]="roleOptions()"
                 optionLabel="name"
@@ -101,7 +103,7 @@ export interface Role {
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Function Filter</label>
-              <p-dropdown 
+              <p-dropdown
                 [(ngModel)]="selectedFunctionFilter"
                 [options]="functionOptions()"
                 optionLabel="name"
@@ -114,7 +116,7 @@ export interface Role {
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Command Filter</label>
-              <p-dropdown 
+              <p-dropdown
                 [(ngModel)]="selectedCommandFilter"
                 [options]="commandOptions()"
                 optionLabel="name"
@@ -128,10 +130,10 @@ export interface Role {
           </div>
 
           <!-- Permissions Table -->
-          <p-table 
-            [value]="filteredPermissions()" 
+          <p-table
+            [value]="filteredPermissions()"
             [loading]="loading()"
-            [paginator]="true" 
+            [paginator]="true"
             [rows]="10"
             [showCurrentPageReport]="true"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
@@ -150,11 +152,7 @@ export interface Role {
             <ng-template pTemplate="body" let-group>
               <tr>
                 <td>
-                  <p-tag 
-                    [value]="group.roleName" 
-                    [severity]="getRoleSeverity(group.roleName)"
-                    class="font-medium"
-                  />
+                  <p-tag [value]="group.roleName" [severity]="getRoleSeverity(group.roleName)" class="font-medium" />
                 </td>
                 <td>
                   <div class="flex items-center gap-2">
@@ -167,19 +165,15 @@ export interface Role {
                 <td>
                   <div class="flex flex-wrap gap-1">
                     @for (command of group.commands; track command.id) {
-                      <p-tag 
-                        [value]="command.name" 
-                        severity="info"
-                        class="text-xs"
-                      />
+                      <p-tag [value]="command.name" severity="info" class="text-xs" />
                     }
                   </div>
                 </td>
                 @if (authService.hasPermission('SystemPermission', 'Delete')) {
                   <td class="text-center">
-                    <button 
-                      pButton 
-                      type="button" 
+                    <button
+                      pButton
+                      type="button"
                       icon="pi pi-trash"
                       class="p-button-rounded p-button-text p-button-sm p-button-danger"
                       pTooltip="Remove Permission"
@@ -204,7 +198,7 @@ export interface Role {
       </p-card>
 
       <!-- Assign Permission Dialog -->
-      <p-dialog 
+      <p-dialog
         header="Assign Permission"
         [modal]="true"
         [draggable]="false"
@@ -215,7 +209,7 @@ export interface Role {
         <form (ngSubmit)="assignPermission()" #permissionForm="ngForm" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
-            <p-dropdown 
+            <p-dropdown
               [(ngModel)]="assignFormData.roleId"
               name="roleId"
               [options]="roleOptions()"
@@ -226,10 +220,10 @@ export interface Role {
               class="w-full"
             />
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Function</label>
-            <p-dropdown 
+            <p-dropdown
               [(ngModel)]="assignFormData.functionId"
               name="functionId"
               [options]="functionOptions()"
@@ -240,10 +234,10 @@ export interface Role {
               class="w-full"
             />
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Commands</label>
-            <p-multiSelect 
+            <p-multiSelect
               [(ngModel)]="assignFormData.commandIds"
               name="commandIds"
               [options]="commandOptions()"
@@ -255,18 +249,18 @@ export interface Role {
             />
           </div>
         </form>
-        
+
         <ng-template pTemplate="footer">
           <div class="flex justify-end gap-2">
-            <button 
-              pButton 
+            <button
+              pButton
               type="button"
               label="Cancel"
               class="p-button-text"
               (click)="showAssignDialog = false"
             ></button>
-            <button 
-              pButton 
+            <button
+              pButton
               type="button"
               label="Assign"
               [loading]="saving()"
@@ -321,43 +315,45 @@ export class PermissionsComponent implements OnInit {
 
   loadData(): void {
     this.loading.set(true);
-    
+
     // Load all data in parallel
     Promise.all([
       this.permissionsService.getPermissions().toPromise(),
       this.permissionsService.getFunctions().toPromise(),
       this.permissionsService.getCommands().toPromise(),
       this.permissionsService.getRoles().toPromise()
-    ]).then(([permissions, functions, commands, roles]) => {
-      this.permissions.set(permissions || []);
-      this.functions.set(functions || []);
-      this.commands.set(commands || []);
-      this.roles.set(roles || []);
-      
-      this.roleOptions.set(roles || []);
-      this.functionOptions.set(functions || []);
-      this.commandOptions.set(commands || []);
-      
-      this.applyFilters();
-      this.loading.set(false);
-    }).catch(error => {
-      console.error('Error loading data:', error);
-      this.notificationService.showError('Failed to load permissions data');
-      this.loading.set(false);
-    });
+    ])
+      .then(([permissions, functions, commands, roles]) => {
+        this.permissions.set(permissions || []);
+        this.functions.set(functions || []);
+        this.commands.set(commands || []);
+        this.roles.set(roles || []);
+
+        this.roleOptions.set(roles || []);
+        this.functionOptions.set(functions || []);
+        this.commandOptions.set(commands || []);
+
+        this.applyFilters();
+        this.loading.set(false);
+      })
+      .catch((error) => {
+        console.error('Error loading data:', error);
+        this.notificationService.showError('Failed to load permissions data');
+        this.loading.set(false);
+      });
   }
 
   applyFilters(): void {
     let filtered = this.permissions();
 
     if (this.selectedRoleFilter) {
-      filtered = filtered.filter(p => p.roleId === this.selectedRoleFilter);
+      filtered = filtered.filter((p) => p.roleId === this.selectedRoleFilter);
     }
     if (this.selectedFunctionFilter) {
-      filtered = filtered.filter(p => p.functionId === this.selectedFunctionFilter);
+      filtered = filtered.filter((p) => p.functionId === this.selectedFunctionFilter);
     }
     if (this.selectedCommandFilter) {
-      filtered = filtered.filter(p => p.commandId === this.selectedCommandFilter);
+      filtered = filtered.filter((p) => p.commandId === this.selectedCommandFilter);
     }
 
     // Group by role and function
@@ -367,8 +363,8 @@ export class PermissionsComponent implements OnInit {
 
   private groupPermissions(permissions: Permission[]): any[] {
     const groups = new Map();
-    
-    permissions.forEach(permission => {
+
+    permissions.forEach((permission) => {
       const key = `${permission.roleId}_${permission.functionId}`;
       if (!groups.has(key)) {
         groups.set(key, {
@@ -379,13 +375,13 @@ export class PermissionsComponent implements OnInit {
           commands: []
         });
       }
-      
+
       groups.get(key).commands.push({
         id: permission.commandId,
         name: permission.commandName
       });
     });
-    
+
     return Array.from(groups.values());
   }
 
@@ -400,24 +396,26 @@ export class PermissionsComponent implements OnInit {
 
   assignPermission(): void {
     this.saving.set(true);
-    
-    this.permissionsService.assignPermissions({
-      roleId: this.assignFormData.roleId,
-      functionId: this.assignFormData.functionId,
-      commandIds: this.assignFormData.commandIds
-    }).subscribe({
-      next: () => {
-        this.notificationService.showSuccess('Permissions assigned successfully');
-        this.showAssignDialog = false;
-        this.loadData();
-        this.saving.set(false);
-      },
-      error: (error) => {
-        console.error('Error assigning permissions:', error);
-        this.notificationService.showError('Failed to assign permissions');
-        this.saving.set(false);
-      }
-    });
+
+    this.permissionsService
+      .assignPermissions({
+        roleId: this.assignFormData.roleId,
+        functionId: this.assignFormData.functionId,
+        commandIds: this.assignFormData.commandIds
+      })
+      .subscribe({
+        next: () => {
+          this.notificationService.showSuccess('Permissions assigned successfully');
+          this.showAssignDialog = false;
+          this.loadData();
+          this.saving.set(false);
+        },
+        error: (error) => {
+          console.error('Error assigning permissions:', error);
+          this.notificationService.showError('Failed to assign permissions');
+          this.saving.set(false);
+        }
+      });
   }
 
   removePermission(group: any): void {
@@ -443,10 +441,14 @@ export class PermissionsComponent implements OnInit {
 
   getRoleSeverity(roleName: string): 'success' | 'info' | 'warning' | 'danger' {
     switch (roleName.toLowerCase()) {
-      case 'admin': return 'danger';
-      case 'manager': return 'warning';
-      case 'member': return 'info';
-      default: return 'success';
+      case 'admin':
+        return 'danger';
+      case 'manager':
+        return 'warning';
+      case 'member':
+        return 'info';
+      default:
+        return 'success';
     }
   }
-} 
+}

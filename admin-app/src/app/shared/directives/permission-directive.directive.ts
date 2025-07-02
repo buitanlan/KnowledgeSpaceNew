@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, OnInit } from '@angular/core';
+import { Directive, ElementRef, input, OnInit } from '@angular/core';
 import { AuthService } from '@app/shared/services/auth.service';
 
 @Directive({
@@ -6,18 +6,19 @@ import { AuthService } from '@app/shared/services/auth.service';
   standalone: true
 })
 export class PermissionDirective implements OnInit {
+  appFunction = input.required<string>();
+  appAction = input.required<string>();
 
-  @Input() appFunction!: string;
-  @Input() appAction!: string;
-
-  constructor(private el: ElementRef, private authService: AuthService) {
-
-  }
+  constructor(
+    private el: ElementRef,
+    private authService: AuthService
+  ) {}
   ngOnInit() {
     const loggedInUser = this.authService.isAuthenticated();
     if (loggedInUser) {
-      const permissions = JSON.parse(this.authService.getProfile()?.['permissions']! as string) as Array<string>;
-      if (permissions && permissions.filter(x => x === this.appFunction + '_' + this.appAction).length > 0) {
+      if (
+        this.authService?.permissions()?.filter((x) => x === this.appFunction() + '_' + this.appAction()).length > 0
+      ) {
         this.el.nativeElement.style.display = '';
       } else {
         this.el.nativeElement.style.display = 'none';
@@ -26,5 +27,4 @@ export class PermissionDirective implements OnInit {
       this.el.nativeElement.style.display = 'none';
     }
   }
-
 }

@@ -81,8 +81,8 @@ export class UsersService {
   }
 
   removeRolesFromUser(userId: string, roleNames: string[]): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${userId}/roles`, { 
-      body: { roleNames } 
+    return this.http.delete<void>(`${this.apiUrl}/${userId}/roles`, {
+      body: { roleNames }
     });
   }
 
@@ -92,4 +92,4 @@ export class UsersService {
       newPassword
     });
   }
-} 
+}

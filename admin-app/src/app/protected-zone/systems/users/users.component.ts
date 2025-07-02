@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -11,37 +11,19 @@ import { ToastModule } from 'primeng/toast';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { BadgeModule } from 'primeng/badge';
+import { PasswordModule } from 'primeng/password';
 import { ConfirmationService } from 'primeng/api';
-import { UsersService } from '@app/shared/services/users.service';
+import { UsersService, User, CreateUserRequest, UpdateUserRequest } from '@app/shared/services/users.service';
 import { NotificationService } from '@app/shared/services/notification.service';
 import { AuthService } from '@app/shared/services/auth.service';
-
-export interface User {
-  id: string;
-  userName: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber?: string;
-  dob?: Date;
-}
-
-export interface CreateUserRequest {
-  userName: string;
-  password: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber?: string;
-  dob: string;
-}
+import { PermissionDirective } from '@app/shared/directives/permission-directive.directive';
 
 @Component({
   selector: 'app-users',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     TableModule,
     ButtonModule,
     InputTextModule,
@@ -50,7 +32,9 @@ export interface CreateUserRequest {
     ToastModule,
     CardModule,
     TagModule,
-    BadgeModule
+    BadgeModule,
+    PasswordModule,
+    PermissionDirective
   ],
   template: `
     <div class="p-6">
@@ -61,16 +45,17 @@ export interface CreateUserRequest {
               <h1 class="text-2xl font-bold mb-1">User Management</h1>
               <p class="text-blue-100">Manage system users and their permissions</p>
             </div>
-            @if (authService.hasPermission('SystemUser', 'Create')) {
-              <button
-                pButton
-                type="button"
-                label="New User"
-                icon="pi pi-plus"
-                class="p-button-sm bg-white text-blue-600 hover:bg-blue-50"
-                (click)="openCreateDialog()"
-              ></button>
-            }
+            <button
+              pButton
+              type="button"
+              label="New User"
+              icon="pi pi-plus"
+              class="p-button-sm bg-white text-blue-600 hover:bg-blue-50"
+              (click)="openCreateDialog()"
+              appPermission
+              [appFunction]="'SystemUser'"
+              [appAction]="'Create'"
+            ></button>
           </div>
         </ng-template>
 
@@ -83,8 +68,7 @@ export interface CreateUserRequest {
                 <input
                   pInputText
                   type="text"
-                  [(ngModel)]="searchTerm"
-                  (input)="onSearch()"
+                  [formControl]="searchControl"
                   placeholder="Search users..."
                   class="w-full"
                 />
@@ -115,9 +99,7 @@ export interface CreateUserRequest {
                 <th class="text-left">User Info</th>
                 <th class="text-left">Contact</th>
                 <th class="text-left">Status</th>
-                @if (authService.hasPermission('SystemUser', 'Update') || authService.hasPermission('SystemUser', 'Delete')) {
-                  <th class="text-center">Actions</th>
-                }
+                <th class="text-center" appPermission [appFunction]="'SystemUser'" [appAction]="'Update'">Actions</th>
               </tr>
             </ng-template>
             <ng-template pTemplate="body" let-user>
@@ -125,7 +107,9 @@ export interface CreateUserRequest {
                 <td>
                   <div class="flex items-center gap-3">
                     <div class="flex-shrink-0">
-                      <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
+                      <div
+                        class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold"
+                      >
                         {{ getInitials(user.firstName, user.lastName) }}
                       </div>
                     </div>
@@ -144,46 +128,45 @@ export interface CreateUserRequest {
                   </div>
                 </td>
                 <td>
-                  <p-tag
-                    value="Active"
-                    severity="success"
-                    class="text-xs"
-                  />
+                  <p-tag value="Active" severity="success" class="text-xs" />
                 </td>
-                @if (authService.hasPermission('SystemUser', 'Update') || authService.hasPermission('SystemUser', 'Delete')) {
-                  <td class="text-center">
-                    <div class="flex justify-center gap-2">
-                      @if (authService.hasPermission('SystemUser', 'Update')) {
-                        <button
-                          pButton
-                          type="button"
-                          icon="pi pi-pencil"
-                          class="p-button-rounded p-button-text p-button-sm"
-                          pTooltip="Edit User"
-                          (click)="editUser(user)"
-                        ></button>
-                        <button
-                          pButton
-                          type="button"
-                          icon="pi pi-shield"
-                          class="p-button-rounded p-button-text p-button-sm"
-                          pTooltip="Manage Permissions"
-                          (click)="managePermissions(user)"
-                        ></button>
-                      }
-                      @if (authService.hasPermission('SystemUser', 'Delete')) {
-                        <button
-                          pButton
-                          type="button"
-                          icon="pi pi-trash"
-                          class="p-button-rounded p-button-text p-button-sm p-button-danger"
-                          pTooltip="Delete User"
-                          (click)="deleteUser(user)"
-                        ></button>
-                      }
-                    </div>
-                  </td>
-                }
+                <td class="text-center">
+                  <div class="flex justify-center gap-2">
+                    <button
+                      pButton
+                      type="button"
+                      icon="pi pi-pencil"
+                      class="p-button-rounded p-button-text p-button-sm"
+                      pTooltip="Edit User"
+                      (click)="editUser(user)"
+                      appPermission
+                      [appFunction]="'SystemUser'"
+                      [appAction]="'Update'"
+                    ></button>
+                    <button
+                      pButton
+                      type="button"
+                      icon="pi pi-shield"
+                      class="p-button-rounded p-button-text p-button-sm"
+                      pTooltip="Manage Permissions"
+                      (click)="managePermissions(user)"
+                      appPermission
+                      [appFunction]="'SystemUser'"
+                      [appAction]="'Update'"
+                    ></button>
+                    <button
+                      pButton
+                      type="button"
+                      icon="pi pi-trash"
+                      class="p-button-rounded p-button-text p-button-sm p-button-danger"
+                      pTooltip="Delete User"
+                      (click)="deleteUser(user)"
+                      appPermission
+                      [appFunction]="'SystemUser'"
+                      [appAction]="'Delete'"
+                    ></button>
+                  </div>
+                </td>
               </tr>
             </ng-template>
             <ng-template pTemplate="emptymessage">
@@ -209,106 +192,83 @@ export interface CreateUserRequest {
         [(visible)]="showUserDialog"
         [style]="{ width: '500px' }"
       >
-        <form (ngSubmit)="saveUser()" #userForm="ngForm" class="space-y-4">
+        <form [formGroup]="userForm" (ngSubmit)="saveUser()" class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-              <input
-                pInputText
-                [(ngModel)]="userFormData.firstName"
-                name="firstName"
-                required
-                class="w-full"
-              />
+              <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+              <input pInputText formControlName="firstName" placeholder="Enter first name" class="w-full" />
+              @if (userForm.get('firstName')?.invalid && userForm.get('firstName')?.touched) {
+                <small class="text-red-500">First name is required</small>
+              }
             </div>
+
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-              <input
-                pInputText
-                [(ngModel)]="userFormData.lastName"
-                name="lastName"
-                required
-                class="w-full"
-              />
+              <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+              <input pInputText formControlName="lastName" placeholder="Enter last name" class="w-full" />
+              @if (userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched) {
+                <small class="text-red-500">Last name is required</small>
+              }
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
-            <input
-              pInputText
-              [(ngModel)]="userFormData.userName"
-              name="userName"
-              required
-              class="w-full"
-            />
+            <label class="block text-sm font-medium text-gray-700 mb-1">Username *</label>
+            <input pInputText formControlName="userName" placeholder="Enter username" class="w-full" />
+            @if (userForm.get('userName')?.invalid && userForm.get('userName')?.touched) {
+              <small class="text-red-500">Username is required</small>
+            }
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              pInputText
-              type="email"
-              [(ngModel)]="userFormData.email"
-              name="email"
-              required
-              class="w-full"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-            <input
-              pInputText
-              [(ngModel)]="userFormData.phoneNumber"
-              name="phoneNumber"
-              class="w-full"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
-            <input
-              pInputText
-              type="date"
-              [(ngModel)]="userFormData.dob"
-              name="dob"
-              required
-              class="w-full"
-            />
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+            <input pInputText type="email" formControlName="email" placeholder="Enter email address" class="w-full" />
+            @if (userForm.get('email')?.invalid && userForm.get('email')?.touched) {
+              <small class="text-red-500">
+                @if (userForm.get('email')?.errors?.['required']) {
+                  Email is required
+                } @else if (userForm.get('email')?.errors?.['email']) {
+                  Please enter a valid email address
+                }
+              </small>
+            }
           </div>
 
           @if (!isEditMode()) {
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input
-                pInputText
-                type="password"
-                [(ngModel)]="userFormData.password"
-                name="password"
-                placeholder="Leave empty for default password (User@123)"
-                class="w-full"
+              <label class="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+              <p-password
+                formControlName="password"
+                placeholder="Enter password"
+                styleClass="w-full"
+                inputStyleClass="w-full"
+                [toggleMask]="true"
               />
-                                <small class="text-gray-500">Default password: User&#64;123</small>
+              @if (userForm.get('password')?.invalid && userForm.get('password')?.touched) {
+                <small class="text-red-500">Password is required</small>
+              }
             </div>
           }
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+            <input pInputText formControlName="phoneNumber" placeholder="Enter phone number" class="w-full" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+            <input pInputText type="date" formControlName="dob" class="w-full" />
+          </div>
         </form>
 
         <ng-template pTemplate="footer">
           <div class="flex justify-end gap-2">
+            <button pButton type="button" label="Cancel" class="p-button-text" (click)="hideDialog()"></button>
             <button
               pButton
-              type="button"
-              label="Cancel"
-              class="p-button-text"
-              (click)="showUserDialog = false"
-            ></button>
-            <button
-              pButton
-              type="button"
+              type="submit"
               [label]="isEditMode() ? 'Update' : 'Create'"
               [loading]="saving()"
-              [disabled]="!userForm.valid"
+              [disabled]="userForm.invalid"
               (click)="saveUser()"
             ></button>
           </div>
@@ -325,6 +285,7 @@ export class UsersComponent implements OnInit {
   private readonly notificationService = inject(NotificationService);
   private readonly confirmationService = inject(ConfirmationService);
   private readonly router = inject(Router);
+  private readonly fb = inject(FormBuilder);
   readonly authService = inject(AuthService);
 
   // Signals
@@ -334,53 +295,58 @@ export class UsersComponent implements OnInit {
   saving = signal<boolean>(false);
   isEditMode = signal<boolean>(false);
 
-  // Form data
-  searchTerm = '';
+  // Form controls
+  searchControl = new FormControl('', { nonNullable: true });
   showUserDialog = false;
   currentUserId = '';
 
-  userFormData: CreateUserRequest = {
-    userName: '',
-    password: '',
-    email: '',
-    firstName: '',
-    lastName: '',
-    phoneNumber: '',
-    dob: ''
-  };
+  // Typed reactive form
+  userForm = this.fb.group({
+    userName: this.fb.control('', { nonNullable: true, validators: [Validators.required] }),
+    password: this.fb.control('', { nonNullable: true, validators: [Validators.required] }),
+    email: this.fb.control('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
+    firstName: this.fb.control('', { nonNullable: true, validators: [Validators.required] }),
+    lastName: this.fb.control('', { nonNullable: true, validators: [Validators.required] }),
+    phoneNumber: this.fb.control('', { nonNullable: true }),
+    dob: this.fb.control('', { nonNullable: true })
+  });
 
   ngOnInit(): void {
     this.loadUsers();
+
+    // Subscribe to search control changes
+    this.searchControl.valueChanges.subscribe(() => {
+      this.onSearch();
+    });
   }
 
   loadUsers(): void {
     this.loading.set(true);
     this.usersService.getUsers().subscribe({
-      next: (users) => {
+      next: (users: User[]) => {
         this.users.set(users);
         this.filteredUsers.set(users);
-        this.loading.set(false);
       },
-      error: (error) => {
-        console.error('Error loading users:', error);
-        this.notificationService.showError('Failed to load users');
-        this.loading.set(false);
-      }
+      error: (error: any) => {
+        this.notificationService.showError('Failed to load users: ' + error.message);
+      },
+      complete: () => this.loading.set(false)
     });
   }
 
   onSearch(): void {
-    const term = this.searchTerm.toLowerCase();
-    if (!term) {
+    const searchTerm = this.searchControl.value.toLowerCase();
+    if (!searchTerm) {
       this.filteredUsers.set(this.users());
       return;
     }
 
-    const filtered = this.users().filter(user =>
-      user.userName.toLowerCase().includes(term) ||
-      user.email.toLowerCase().includes(term) ||
-      user.firstName.toLowerCase().includes(term) ||
-      user.lastName.toLowerCase().includes(term)
+    const filtered = this.users().filter(
+      (user) =>
+        user.firstName.toLowerCase().includes(searchTerm) ||
+        user.lastName.toLowerCase().includes(searchTerm) ||
+        user.userName.toLowerCase().includes(searchTerm) ||
+        user.email.toLowerCase().includes(searchTerm)
     );
     this.filteredUsers.set(filtered);
   }
@@ -394,67 +360,84 @@ export class UsersComponent implements OnInit {
   editUser(user: User): void {
     this.isEditMode.set(true);
     this.currentUserId = user.id;
-    this.userFormData = {
+
+    // Patch form with user data
+    this.userForm.patchValue({
       userName: user.userName,
-      password: '',
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
       phoneNumber: user.phoneNumber || '',
       dob: user.dob ? new Date(user.dob).toISOString().split('T')[0] : ''
-    };
+    });
+
+    // Remove password requirement for edit mode
+    this.userForm.get('password')?.clearValidators();
+    this.userForm.get('password')?.updateValueAndValidity();
+
     this.showUserDialog = true;
   }
 
   saveUser(): void {
+    if (this.userForm.invalid) {
+      this.userForm.markAllAsTouched();
+      return;
+    }
+
     this.saving.set(true);
+    const formData = this.userForm.getRawValue();
 
     if (this.isEditMode()) {
-      this.usersService.updateUser(this.currentUserId, this.userFormData).subscribe({
+      // Handle update logic
+      const updateData: UpdateUserRequest = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phoneNumber: formData.phoneNumber,
+        dob: formData.dob
+      };
+
+      this.usersService.updateUser(this.currentUserId, updateData).subscribe({
         next: () => {
           this.notificationService.showSuccess('User updated successfully');
-          this.showUserDialog = false;
+          this.hideDialog();
           this.loadUsers();
-          this.saving.set(false);
         },
-        error: (error) => {
-          console.error('Error updating user:', error);
-          this.notificationService.showError('Failed to update user');
-          this.saving.set(false);
-        }
+        error: (error: any) => {
+          this.notificationService.showError('Failed to update user: ' + error.message);
+        },
+        complete: () => this.saving.set(false)
       });
     } else {
-      this.usersService.createUser(this.userFormData).subscribe({
-        next: () => {
+      // Handle create logic
+      const createData: CreateUserRequest = formData;
+
+      this.usersService.createUser(createData).subscribe({
+        next: (user: User) => {
           this.notificationService.showSuccess('User created successfully');
-          this.showUserDialog = false;
+          this.hideDialog();
           this.loadUsers();
-          this.saving.set(false);
         },
-        error: (error) => {
-          console.error('Error creating user:', error);
-          this.notificationService.showError('Failed to create user');
-          this.saving.set(false);
-        }
+        error: (error: any) => {
+          this.notificationService.showError('Failed to create user: ' + error.message);
+        },
+        complete: () => this.saving.set(false)
       });
     }
   }
 
   deleteUser(user: User): void {
     this.confirmationService.confirm({
-      message: `Are you sure you want to delete user "${user.userName}"?`,
+      message: `Are you sure you want to delete user "${user.firstName} ${user.lastName}"?`,
       header: 'Confirm Delete',
       icon: 'pi pi-exclamation-triangle',
-      acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
         this.usersService.deleteUser(user.id).subscribe({
           next: () => {
             this.notificationService.showSuccess('User deleted successfully');
             this.loadUsers();
           },
-          error: (error) => {
-            console.error('Error deleting user:', error);
-            this.notificationService.showError('Failed to delete user');
+          error: (error: any) => {
+            this.notificationService.showError('Failed to delete user: ' + error.message);
           }
         });
       }
@@ -462,15 +445,15 @@ export class UsersComponent implements OnInit {
   }
 
   managePermissions(user: User): void {
-    this.router.navigate(['/systems/users', user.id, 'permissions']);
+    this.router.navigate(['/users', user.id, 'roles']);
   }
 
   getInitials(firstName: string, lastName: string): string {
-    return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+    return `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase();
   }
 
   private resetForm(): void {
-    this.userFormData = {
+    this.userForm.reset({
       userName: '',
       password: '',
       email: '',
@@ -478,7 +461,16 @@ export class UsersComponent implements OnInit {
       lastName: '',
       phoneNumber: '',
       dob: ''
-    };
+    });
+
+    // Reset password validation for create mode
+    this.userForm.get('password')?.setValidators([Validators.required]);
+    this.userForm.get('password')?.updateValueAndValidity();
+  }
+
+  hideDialog(): void {
+    this.showUserDialog = false;
+    this.resetForm();
     this.currentUserId = '';
   }
 }

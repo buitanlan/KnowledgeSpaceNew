@@ -15,6 +15,7 @@ import { ConfirmationService } from 'primeng/api';
 import { FunctionsService } from '@app/shared/services/functions.service';
 import { NotificationService } from '@app/shared/services/notification.service';
 import { AuthService } from '@app/shared/services/auth.service';
+import { PermissionDirective } from '@app/shared/directives/permission-directive.directive';
 
 export interface Function {
   id: string;
@@ -46,7 +47,8 @@ export interface FunctionTreeNode {
     CardModule,
     TreeTableModule,
     ToastModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    PermissionDirective
   ],
   template: `
     <div class="p-6">
@@ -57,33 +59,32 @@ export interface FunctionTreeNode {
               <h1 class="text-2xl font-bold mb-1">Function Management</h1>
               <p class="text-green-100">Manage system functions and menu structure</p>
             </div>
-            @if (authService.hasPermission('SystemFunction', 'Create')) {
-              <button 
-                pButton 
-                type="button" 
-                label="New Function" 
-                icon="pi pi-plus"
-                class="p-button-sm bg-white text-green-600 hover:bg-green-50"
-                (click)="openCreateDialog()"
-              ></button>
-            }
+            <button
+              pButton
+              type="button"
+              label="New Function"
+              icon="pi pi-plus"
+              class="p-button-sm bg-white text-green-600 hover:bg-green-50"
+              (click)="openCreateDialog()"
+              appPermission
+              [appFunction]="'SystemFunction'"
+              [appAction]="'Create'"
+            ></button>
           </div>
         </ng-template>
 
         <div class="p-4">
           <!-- Functions Tree Table -->
-          <p-treeTable 
-            [value]="functionTree()" 
-            [loading]="loading()"
-            [columns]="columns"
-            styleClass="p-treetable-sm"
-          >
+          <p-treeTable [value]="functionTree()" [loading]="loading()" [columns]="columns" styleClass="p-treetable-sm">
             <ng-template pTemplate="header" let-columns>
               <tr>
                 @for (col of columns; track col.field) {
                   <th [style.width]="col.width">{{ col.header }}</th>
                 }
-                @if (authService.hasPermission('SystemFunction', 'Update') || authService.hasPermission('SystemFunction', 'Delete')) {
+                @if (
+                  authService.hasPermission('SystemFunction', 'Update') ||
+                  authService.hasPermission('SystemFunction', 'Delete')
+                ) {
                   <th class="text-center" style="width: 150px">Actions</th>
                 }
               </tr>
@@ -118,13 +119,16 @@ export interface FunctionTreeNode {
                     <span class="text-gray-400">-</span>
                   }
                 </td>
-                @if (authService.hasPermission('SystemFunction', 'Update') || authService.hasPermission('SystemFunction', 'Delete')) {
+                @if (
+                  authService.hasPermission('SystemFunction', 'Update') ||
+                  authService.hasPermission('SystemFunction', 'Delete')
+                ) {
                   <td class="text-center">
                     <div class="flex justify-center gap-2">
                       @if (authService.hasPermission('SystemFunction', 'Update')) {
-                        <button 
-                          pButton 
-                          type="button" 
+                        <button
+                          pButton
+                          type="button"
                           icon="pi pi-pencil"
                           class="p-button-rounded p-button-text p-button-sm"
                           pTooltip="Edit Function"
@@ -132,9 +136,9 @@ export interface FunctionTreeNode {
                         ></button>
                       }
                       @if (authService.hasPermission('SystemFunction', 'Delete')) {
-                        <button 
-                          pButton 
-                          type="button" 
+                        <button
+                          pButton
+                          type="button"
                           icon="pi pi-trash"
                           class="p-button-rounded p-button-text p-button-sm p-button-danger"
                           pTooltip="Delete Function"
@@ -161,7 +165,7 @@ export interface FunctionTreeNode {
       </p-card>
 
       <!-- Create/Edit Function Dialog -->
-      <p-dialog 
+      <p-dialog
         [header]="isEditMode() ? 'Edit Function' : 'Create New Function'"
         [modal]="true"
         [draggable]="false"
@@ -172,8 +176,8 @@ export interface FunctionTreeNode {
         <form (ngSubmit)="saveFunction()" #functionForm="ngForm" class="space-y-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Function ID</label>
-            <input 
-              pInputText 
+            <input
+              pInputText
               [(ngModel)]="functionFormData.id"
               name="id"
               required
@@ -183,11 +187,11 @@ export interface FunctionTreeNode {
             />
             <small class="text-gray-500">Unique identifier for the function</small>
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Function Name</label>
-            <input 
-              pInputText 
+            <input
+              pInputText
               [(ngModel)]="functionFormData.name"
               name="name"
               required
@@ -195,10 +199,10 @@ export interface FunctionTreeNode {
               class="w-full"
             />
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Parent Function</label>
-            <p-dropdown 
+            <p-dropdown
               [(ngModel)]="functionFormData.parentId"
               name="parentId"
               [options]="parentFunctionOptions()"
@@ -209,23 +213,23 @@ export interface FunctionTreeNode {
               class="w-full"
             />
           </div>
-          
+
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">URL</label>
-            <input 
-              pInputText 
+            <input
+              pInputText
               [(ngModel)]="functionFormData.url"
               name="url"
               placeholder="e.g., /systems/users"
               class="w-full"
             />
           </div>
-          
+
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Icon</label>
-              <input 
-                pInputText 
+              <input
+                pInputText
                 [(ngModel)]="functionFormData.icon"
                 name="icon"
                 placeholder="e.g., pi-users"
@@ -235,27 +239,22 @@ export interface FunctionTreeNode {
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
-              <p-inputNumber 
-                [(ngModel)]="functionFormData.sortOrder"
-                name="sortOrder"
-                [min]="0"
-                class="w-full"
-              />
+              <p-inputNumber [(ngModel)]="functionFormData.sortOrder" name="sortOrder" [min]="0" class="w-full" />
             </div>
           </div>
         </form>
-        
+
         <ng-template pTemplate="footer">
           <div class="flex justify-end gap-2">
-            <button 
-              pButton 
-              type="button" 
+            <button
+              pButton
+              type="button"
               label="Cancel"
               class="p-button-text"
               (click)="showFunctionDialog = false"
             ></button>
-            <button 
-              pButton 
+            <button
+              pButton
               type="button"
               [label]="isEditMode() ? 'Update' : 'Create'"
               [loading]="saving()"
@@ -295,7 +294,7 @@ export class FunctionsComponent implements OnInit {
   // Form data
   showFunctionDialog = false;
   currentFunctionId = '';
-  
+
   functionFormData: Function = {
     id: '',
     name: '',
@@ -336,9 +335,9 @@ export class FunctionsComponent implements OnInit {
 
   private buildTree(functions: Function[], parentId: string | null): FunctionTreeNode[] {
     return functions
-      .filter(f => f.parentId === parentId)
+      .filter((f) => f.parentId === parentId)
       .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
-      .map(func => ({
+      .map((func) => ({
         data: func,
         children: this.buildTree(functions, func.id),
         expanded: true
@@ -346,7 +345,7 @@ export class FunctionsComponent implements OnInit {
   }
 
   private updateParentOptions(functions: Function[]): void {
-    this.parentFunctionOptions.set(functions.filter(f => !f.parentId));
+    this.parentFunctionOptions.set(functions.filter((f) => !f.parentId));
   }
 
   openCreateDialog(): void {
@@ -364,7 +363,7 @@ export class FunctionsComponent implements OnInit {
 
   saveFunction(): void {
     this.saving.set(true);
-    
+
     if (this.isEditMode()) {
       this.functionsService.updateFunction(this.currentFunctionId, this.functionFormData).subscribe({
         next: () => {
@@ -428,4 +427,4 @@ export class FunctionsComponent implements OnInit {
     };
     this.currentFunctionId = '';
   }
-} 
+}
