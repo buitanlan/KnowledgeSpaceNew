@@ -72,7 +72,7 @@ export class RegisterComponent {
       this.authService.register(formValue as RegisterRequest).subscribe({
         next: () => {
           this.notificationService.showSuccess('Registration successful!');
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/login']);
         },
         error: (error) => {
           const errorMsg = error.error?.message || 'Registration failed. Please try again.';

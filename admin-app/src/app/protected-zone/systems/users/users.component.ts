@@ -61,10 +61,9 @@ import { PermissionDirective } from '@app/shared/directives/permission-directive
 
         <div class="p-4">
           <!-- Search and Filter -->
-          <div class="mb-4 flex gap-4 items-center">
-            <div class="flex-1">
-              <span class="p-input-icon-left w-full">
-                <i class="pi pi-search"></i>
+          <div class="mb-4 flex flex-wrap justify-between items-center gap-">
+            <div class="flex items-center gap-2 flex-grow">
+              <span class="p-input-icon-left w-full block">
                 <input
                   pInputText
                   type="text"
@@ -74,14 +73,16 @@ import { PermissionDirective } from '@app/shared/directives/permission-directive
                 />
               </span>
             </div>
-            <button
-              pButton
-              type="button"
-              icon="pi pi-refresh"
-              class="p-button-outlined"
-              (click)="loadUsers()"
-              [loading]="loading()"
-            ></button>
+            <div>
+              <button
+                pButton
+                type="button"
+                icon="pi pi-refresh"
+                class="min-h-[42px] p-button-outlined h-full"
+                (click)="loadUsers()"
+                [loading]="loading()"
+              ></button>
+            </div>
           </div>
 
           <!-- Users Table -->
@@ -197,40 +198,56 @@ import { PermissionDirective } from '@app/shared/directives/permission-directive
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
               <input pInputText formControlName="firstName" placeholder="Enter first name" class="w-full" />
-              @if (userForm.get('firstName')?.invalid && userForm.get('firstName')?.touched) {
-                <small class="text-red-500">First name is required</small>
-              }
+              <small
+                class="text-red-500"
+                *ngIf="userForm.get('firstName')?.invalid && userForm.get('firstName')?.touched"
+              >
+                First name is required
+              </small>
             </div>
 
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
               <input pInputText formControlName="lastName" placeholder="Enter last name" class="w-full" />
-              @if (userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched) {
-                <small class="text-red-500">Last name is required</small>
-              }
+              <small
+                class="text-red-500"
+                *ngIf="userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched"
+              >
+                Last name is required
+              </small>
             </div>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Username *</label>
-            <input pInputText formControlName="userName" placeholder="Enter username" class="w-full" />
-            @if (userForm.get('userName')?.invalid && userForm.get('userName')?.touched) {
-              <small class="text-red-500">Username is required</small>
-            }
+            <input
+              pInputText
+              formControlName="userName"
+              placeholder="Enter username"
+              class="w-full"
+              [disabled]="isEditMode()"
+            />
+            <small class="text-red-500" *ngIf="userForm.get('userName')?.invalid && userForm.get('userName')?.touched">
+              Username is required
+            </small>
           </div>
 
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-            <input pInputText type="email" formControlName="email" placeholder="Enter email address" class="w-full" />
-            @if (userForm.get('email')?.invalid && userForm.get('email')?.touched) {
-              <small class="text-red-500">
-                @if (userForm.get('email')?.errors?.['required']) {
-                  Email is required
-                } @else if (userForm.get('email')?.errors?.['email']) {
-                  Please enter a valid email address
-                }
-              </small>
-            }
+            <input
+              pInputText
+              type="email"
+              formControlName="email"
+              placeholder="Enter email address"
+              class="w-full"
+              [disabled]="isEditMode()"
+            />
+            <small class="text-red-500" *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched">
+              <ng-container *ngIf="userForm.get('email')?.errors?.['required']"> Email is required </ng-container>
+              <ng-container *ngIf="userForm.get('email')?.errors?.['email']">
+                Please enter a valid email address
+              </ng-container>
+            </small>
           </div>
 
           @if (!isEditMode()) {
@@ -243,9 +260,12 @@ import { PermissionDirective } from '@app/shared/directives/permission-directive
                 inputStyleClass="w-full"
                 [toggleMask]="true"
               />
-              @if (userForm.get('password')?.invalid && userForm.get('password')?.touched) {
-                <small class="text-red-500">Password is required</small>
-              }
+              <small
+                class="text-red-500"
+                *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched"
+              >
+                Password is required
+              </small>
             </div>
           }
 
@@ -262,7 +282,13 @@ import { PermissionDirective } from '@app/shared/directives/permission-directive
 
         <ng-template pTemplate="footer">
           <div class="flex justify-end gap-2">
-            <button pButton type="button" label="Cancel" class="p-button-text" (click)="hideDialog()"></button>
+            <button
+              pButton
+              type="button"
+              label="Cancel"
+              class=" min-h-[42px] p-button-text"
+              (click)="hideDialog()"
+            ></button>
             <button
               pButton
               type="submit"
@@ -354,6 +380,8 @@ export class UsersComponent implements OnInit {
   openCreateDialog(): void {
     this.isEditMode.set(false);
     this.resetForm();
+    this.userForm.get('userName')?.enable();
+    this.userForm.get('email')?.enable();
     this.showUserDialog = true;
   }
 
@@ -374,7 +402,8 @@ export class UsersComponent implements OnInit {
     // Remove password requirement for edit mode
     this.userForm.get('password')?.clearValidators();
     this.userForm.get('password')?.updateValueAndValidity();
-
+    this.userForm.get('userName')?.disable();
+    this.userForm.get('email')?.disable();
     this.showUserDialog = true;
   }
 

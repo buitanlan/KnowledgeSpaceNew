@@ -135,7 +135,7 @@ public class UsersController(
 
         user.FirstName = request.FirstName;
         user.LastName = request.LastName;
-        user.Dob = DateTime.Parse(request.Dob);
+        user.Dob = DateTime.SpecifyKind(DateTime.Parse(request.Dob), DateTimeKind.Utc);
         user.PhoneNumber = request.PhoneNumber;
 
         var result = await userManager.UpdateAsync(user);
